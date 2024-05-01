@@ -29,10 +29,59 @@ class Tree:
         self.start = start              # Start node
         self.goal = goal                # Goal node
 
-        self.r = 0.5                    # Radius of the neighborhood to explore
+        self.radius = 0.5                    # Radius of the neighborhood to explore
         self.vertices = set()           # Vertices in the tree
         self.edges = set()              # Edges in the tree
         self.queue_vertices = set()     # Vertices in the queue
         self.queue_edges = set()        # Edeges in the queue
         self.old_vertices = set()       # Vertices in the tree in the last iteration
 
+class BITstar:
+    def __init__():
+        pass
+
+    # Algorithm 1: BIT* Algorithm
+    def plan():
+        pass
+
+    # Algorithm 2: Expand Vertex
+    def expand_vertex():
+        pass
+
+    # Algorithm 3: Prune
+    def prune():
+        pass
+
+    # Other functions used in Algorithm 1
+    def best_queue_vertex():
+        pass
+
+    def best_queue_edge():
+        pass
+
+    def best_in_queue():
+        pass
+
+    def best_in_edge():
+        pass
+
+    def sample():
+        pass
+
+    def calculate_cost():
+        pass
+
+    def calculate_g_hat():
+        pass
+
+    def calculate_h_hat():
+        pass
+
+    def calculate_f_hat():
+        pass
+
+    def g_t():
+        pass
+
+    def update_radius():
+        pass
