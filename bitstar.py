@@ -159,6 +159,18 @@ class BITstar:
     def calculate_cost():
         pass
 
+    def calculate_cost_hat(self, node1, node2):
+        """Calculate the cost to come to a node.
+
+        Args:
+            v (Node): The first node
+            w (Node): The second node
+
+        Returns:
+            float: The cost to come to the node
+        """
+        return math.sqrt((node2.x - node1.x)**2 + (node2.y - node1.y)**2)
+
     def calculate_g_hat():
         pass
 
