@@ -147,14 +147,19 @@ class BITstar:
         self.tree.vertices = {vertex for vertex in self.tree.vertices if self.g_T[vertex] < np.inf}
 
     # Other functions used in Algorithm 1
-    def best_queue_vertex():
-        pass
+    def best_queue_vertex(self):
+        if not self.tree.queue_vertices:
+            return np.inf
+        
+        return min(self.g_t[vertex] + self.calculate_h_hat(vertex) for vertex in self.tree.queue_vertices)
 
-    def best_queue_edge():
-        pass
+    def best_queue_edge(self):
+        if not self.tree.queue_edges:
+            return np.inf
 
-    def best_in_queue_vertex():
-        pass
+        return min(self.g_T[vertex] + self.calculate_distance(vertex, x) + self.calculate_h_hat(x)
+                   for vertex, x in self.tree.queue_edges)
+    
 
     def best_in_queue_edge():
         pass
