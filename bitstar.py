@@ -55,7 +55,7 @@ class BITstar:
         self.g_t[self.start] = 0.0                  # Cost to come to the start node is 0
         self.g_t[self.goal] = math.inf              # Cost to come to the goal node is infinity (since we don't know the cost yet)
 
-        c_min, theta = self.calculate_distance(self.start, self.goal) # Calculate the distance between the start and goal nodes
+        c_min, theta = self.calculate_distance_and_angle(self.start, self.goal) # Calculate the distance between the start and goal nodes
         
         center = np.array([[(self.start.x + self.goal.x) / 2], 
                            [(self.start.y + self.goal.y) / 2],
@@ -186,7 +186,7 @@ class BITstar:
     def backtrack():
         pass
 
-    def calculate_distance(self, node1, node2):
+    def calculate_distance_and_angle(self, node1, node2):
         """Calculate the Euclidean distance between two nodes.
 
         Args:
@@ -196,5 +196,5 @@ class BITstar:
         Returns:
             float: The distance between the two nodes
         """
-        return math.sqrt((node2.x - node1.x)**2 + (node2.y - node1.y)**2), math.atan2((node2.y - node1.y), (node2.x - node1.x))
+        return self.calculate_cost_hat(node1,node2), math.atan2((node2.y - node1.y), (node2.x - node1.x))
     
