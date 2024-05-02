@@ -169,8 +169,15 @@ class BITstar:
 
         return min(vertex_value, key=vertex_value.get)
 
-    def best_in_queue_edge():
-        pass
+    def best_in_queue_edge(self):
+        if not self.tree.queue_edges:
+            print("Edges queue in tree is empty")
+            return None
+
+        edge_value = {(vertex, x): self.g_T[vertex] + self.calculate_distance(vertex, x) + self.calculate_h_hat(x)
+                   for vertex, x in self.tree.queue_edges}
+
+        return min(edge_value, key=edge_value.get)
 
     def sample():
         pass
