@@ -45,6 +45,7 @@ class BITstar:
         self.x_sample = set()                       # Sampled nodes
         self.g_t = dict()                           # Cost to come to a node
         self.delta = 0.1                            # Step size
+        self.eta = 1                                # Eta as a tuning parameter  
 
 
     # Algorithm 1: BIT* Algorithm
@@ -137,8 +138,13 @@ class BITstar:
             
 
     # Algorithm 3: Prune
-    def prune():
-        pass
+    def prune(self, c_best):
+        self.x_sample = {x for x in self.x_sample if self.calculate_f_hat(x) < c_best}
+        self.tree.vertices = {vertex for vertex in self.tree.vertices if self.calculate_f_hat(vertex) <= c_best}
+        self.tree.edges = {(vertex, w) for vertex, w in self.tree.edges
+                       if self.calculate_f_hat(vertex) <= c_best and self.calculate_f_hat(w) <= c_best}
+        self.x_sample.update({vertex for vertex in self.tree.vertices if self.g_T[vertex] == np.inf})
+        self.tree.vertices = {vertex for vertex in self.tree.vertices if self.g_T[vertex] < np.inf}
 
     # Other functions used in Algorithm 1
     def best_queue_vertex():
