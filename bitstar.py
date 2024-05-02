@@ -199,10 +199,10 @@ class BITstar:
 
 
     def calculate_g_hat(self, node):
-        return self.calculate_distance(self.start, node)
+        return self.calculate_euclidean_distance(self.start, node)
 
     def calculate_h_hat(self, node):
-        return self.calculate_distance(node, self.goal)
+        return self.calculate_euclidean_distance(node, self.goal)
 
     def calculate_f_hat():
         pass
