@@ -207,8 +207,12 @@ class BITstar:
     def calculate_f_hat():
         pass
 
-    def update_radius():
-        pass
+    def update_radius(self, length):
+        c_best = self.g_T[self.goal]
+        lambda_x = len([1 for vertex in self.tree.vertices if self.calculate_f_hat(vertex) <= c_best])
+        radius = 2 * self.eta * (1.5 * lambda_x / math.pi * math.log(length) / length) ** 0.5
+
+        return radius
 
     def backtrack():
         pass
