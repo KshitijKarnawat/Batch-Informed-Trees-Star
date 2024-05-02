@@ -110,8 +110,31 @@ class BITstar:
         return self.tree
 
     # Algorithm 2: Expand Vertex
-    def expand_vertex():
-        pass
+    def expand_vertex(self, v):
+        x_near = set()
+        v_near = set()
+
+        self.tree.queue_vertices.remove(v)
+
+        for x in self.x_sample:
+            if np.linalg.norm(x-v) <= self.tree.radius:
+                x_near.add(x)
+
+        for x in x_near:
+            if self.calculate_g_hat(v) + self.calculate_cost_hat(v,x) + self.calculate_h_hat(x) < self.g_t[self.goal]:
+                self.tree.queue_edges.add(v,x)
+        
+        if v not in self.tree.old_vertices:
+            for w in self.tree.vertices:
+                if self.np.linalg.norm(x-v) <= self.tree.radius:
+                    v_near.add(w)
+
+        for (v,w) in np.cross(self.tree.vertices, v_near):
+            if (v,w) not in self.tree.edges:
+                if self.calculate_g_hat(v) + self.calculate_cost_hat(v,w) + self.calculate_h_hat(w) < self.g_t[self.goal]:
+                    if self.g_t(v) + self.calculate_cost_hat(v,w) < self.g_t[w]:
+                        self.tree.queue_edges.add(v,w)
+            
 
     # Algorithm 3: Prune
     def prune():
