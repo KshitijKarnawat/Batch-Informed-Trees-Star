@@ -197,8 +197,9 @@ class BITstar:
         """
         return math.sqrt((node2.x - node1.x)**2 + (node2.y - node1.y)**2)
 
-    def calculate_g_hat():
-        pass
+
+    def calculate_g_hat(self, node):
+        return self.calculate_distance(self.start, node)
 
     def calculate_h_hat():
         pass
