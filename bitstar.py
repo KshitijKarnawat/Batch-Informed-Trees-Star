@@ -89,7 +89,7 @@ class BITstar:
 
             self.tree.queue_edges.remove((vm,xm))
             
-            if self.g_t[vm] + self.calculate_cost_hat(vm, xm) + self.calculate_h_hat(xm) < self.g_t[self.goal]:
+            if self.g_t[vm] + self.calculate_euclidean_distance(vm, xm) + self.calculate_h_hat(xm) < self.g_t[self.goal]:
                 if self.calculate_g_hat(vm) + self.calculate_cost(vm, xm) + self.calculate_h_hat(xm) < self.g_t[self.goal]:
                     if self.g_t[vm] + self.calculate_cost(vm, xm) < self.g_t[xm]:
                         for v in self.tree.vertices:
@@ -101,7 +101,7 @@ class BITstar:
                                 self.tree.queue_vertices.add(xm)
                             self.tree.edges.add((v, xm))
                             for (v,xm) in self.tree.queue_edges:
-                                if self.g_t[v] + self.calculate_cost_hat(v, xm) >= self.g_t[xm]:
+                                if self.g_t[v] + self.calculate_euclidean_distance(v, xm) >= self.g_t[xm]:
                                     self.tree.queue_edges.remove((v, xm))
             else:
                 self.tree.queue_edges = set()
@@ -121,7 +121,7 @@ class BITstar:
                 x_near.add(x)
 
         for x in x_near:
-            if self.calculate_g_hat(v) + self.calculate_cost_hat(v,x) + self.calculate_h_hat(x) < self.g_t[self.goal]:
+            if self.calculate_g_hat(v) + self.calculate_euclidean_distance(v,x) + self.calculate_h_hat(x) < self.g_t[self.goal]:
                 self.tree.queue_edges.add(v,x)
         
         if v not in self.tree.old_vertices:
@@ -131,8 +131,8 @@ class BITstar:
 
         for (v,w) in np.cross(self.tree.vertices, v_near):
             if (v,w) not in self.tree.edges:
-                if self.calculate_g_hat(v) + self.calculate_cost_hat(v,w) + self.calculate_h_hat(w) < self.g_t[self.goal]:
-                    if self.g_t(v) + self.calculate_cost_hat(v,w) < self.g_t[w]:
+                if self.calculate_g_hat(v) + self.calculate_euclidean_distance(v,w) + self.calculate_h_hat(w) < self.g_t[self.goal]:
+                    if self.g_t(v) + self.calculate_euclidean_distance(v,w) < self.g_t[w]:
                         self.tree.queue_edges.add(v,w)
             
 
@@ -159,7 +159,7 @@ class BITstar:
     def calculate_cost():
         pass
 
-    def calculate_cost_hat(self, node1, node2):
+    def calculate_euclidean_distance(self, node1, node2):
         """Calculate the cost to come to a node.
 
         Args:
@@ -187,7 +187,7 @@ class BITstar:
         pass
 
     def calculate_distance_and_angle(self, node1, node2):
-        """Calculate the Euclidean distance between two nodes.
+        """Calculate the Euclidean distance between two nodes and the angle between them.
 
         Args:
             node1 (Node): The first node
@@ -196,5 +196,5 @@ class BITstar:
         Returns:
             float: The distance between the two nodes
         """
-        return self.calculate_cost_hat(node1,node2), math.atan2((node2.y - node1.y), (node2.x - node1.x))
+        return self.calculate_euclidean_distance(node1,node2), math.atan2((node2.y - node1.y), (node2.x - node1.x))
     
