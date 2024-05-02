@@ -182,8 +182,11 @@ class BITstar:
     def sample():
         pass
 
-    def calculate_cost():
-        pass
+    def calculate_cost(self, node1, node2):
+        if in_obstacle(): # TODO: Implement this function
+            return np.inf
+        else:
+            return self.calculate_euclidean_distance(node1, node2)
 
     def calculate_euclidean_distance(self, node1, node2):
         """Calculate the cost to come to a node.
