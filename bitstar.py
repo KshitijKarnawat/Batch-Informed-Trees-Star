@@ -120,7 +120,7 @@ class BITstar:
             if np.linalg.norm(x-v) <= self.tree.radius:
                 x_near.add(x)
 
-        for x in x_near:
+        for (v,x) in np.cross(self.tree.vertices, x_near):
             if self.calculate_g_hat(v) + self.calculate_euclidean_distance(v,x) + self.calculate_h_hat(x) < self.g_t[self.goal]:
                 self.tree.queue_edges.add(v,x)
         
