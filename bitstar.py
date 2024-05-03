@@ -13,6 +13,7 @@ import random as rng
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from scipy.spatial.transform import Rotation
 
 
 class Node:
@@ -240,3 +241,49 @@ class BITstar:
         """
         return self.calculate_euclidean_distance(node1,node2), math.atan2((node2.y - node1.y), (node2.x - node1.x))
     
+    def draw_map(self):
+        plt.cla()
+        figure, axes = plt.subplots()
+
+        axes.add_patch(patches.Rectangle((0, 0), 1, 30))
+        axes.add_patch(patches.Rectangle((0, 30), 50, 1))
+        axes.add_patch(patches.Rectangle((1, 0), 50, 1))
+        axes.add_patch(patches.Rectangle((50, 1), 1, 30))
+
+        axes.add_patch(patches.Circle((5, 5), 0.5))
+        axes.add_patch(patches.Circle((9, 6), 1))
+        axes.add_patch(patches.Circle((7, 5), 1))
+        axes.add_patch(patches.Circle((1, 5), 1))
+        axes.add_patch(patches.Circle((7, 9), 1))
+
+        plt.plot(self.start.x, self.start.y, "rs", linewidth=3)
+        plt.plot(self.goal.x, self.goal.y, "gs", linewidth=3)
+        plt.axis("equal")
+        plt.title("Map")
+    
+    def visualize_plan(self, c_max, c_min, theta, center):
+        self.draw_map()
+
+        for vertex in self.x_sample:
+            plt.plot(vertex.x, vertex.y, color='orange', markersize='2', marker='.')
+
+        for vertex, w in self.tree.edges:
+            plt.plot([vertex.x, w.x], [vertex.y, w.y], '-g')
+        
+        if c_max >= np.inf:
+            return
+        
+        a = math.sqrt(c_max ** 2 - c_min ** 2) / 2.0
+        b = c_max / 2.0
+        angle = math.pi / 2.0 - theta
+        cx = center[0]
+        cy = center[1]
+        t = np.arange(0, 2 * math.pi + 0.1, 0.2)
+        x = [a * math.cos(it) for it in t]
+        y = [b * math.sin(it) for it in t]
+        rot = Rotation.from_euler('z', -angle).as_dcm()[0:2, 0:2]
+        fx = rot @ np.array([x, y])
+        px = np.array(fx[0, :] + cx).flatten()
+        py = np.array(fx[1, :] + cy).flatten()
+        plt.plot(cx, cy, marker='.', color='darkorange')
+        plt.plot(px, py, linestyle='--', color='darkorange', linewidth=2)
