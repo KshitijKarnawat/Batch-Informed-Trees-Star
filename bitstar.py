@@ -138,13 +138,24 @@ class BITstar:
             
 
     # Algorithm 3: Prune
-    def prune(self, c_best):
-        self.x_sample = {x for x in self.x_sample if self.calculate_f_hat(x) < c_best}
-        self.tree.vertices = {vertex for vertex in self.tree.vertices if self.calculate_f_hat(vertex) <= c_best}
-        self.tree.edges = {(vertex, w) for vertex, w in self.tree.edges
-                       if self.calculate_f_hat(vertex) <= c_best and self.calculate_f_hat(w) <= c_best}
-        self.x_sample.update({vertex for vertex in self.tree.vertices if self.g_T[vertex] == np.inf})
-        self.tree.vertices = {vertex for vertex in self.tree.vertices if self.g_T[vertex] < np.inf}
+    def prune(self, c):
+
+        for x in self.x_sample:
+            if self.calculate_f_hat(x) >= c:
+                self.x_sample.remove(x)
+        
+        for v in self.tree.vertices:
+            if self.calculate_f_hat(v) > c:
+                self.tree.vertices.remove(v)
+
+        for (v,w) in self.tree.edges:
+            if self.calculate_f_hat(v) > c or self.calculate_f_hat(w) > c:
+                self.tree.edges.remove((v,w))
+
+        for v in self.tree.vertices:
+            if self.g_t[v] == np.inf:
+                self.x_sample.add(v)
+                self.tree.vertices.remove(v)
 
     # Other functions used in Algorithm 1
     def best_queue_vertex(self):
