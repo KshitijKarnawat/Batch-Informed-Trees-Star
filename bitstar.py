@@ -45,7 +45,6 @@ class BITstar:
         self.x_sample = set()                       # Sampled nodes
         self.g_t = dict()                           # Cost to come to a node
         self.delta = 0.1                            # Step size
-        self.eta = 1                                # Eta as a tuning parameter  
 
 
     # Algorithm 1: BIT* Algorithm
@@ -81,7 +80,7 @@ class BITstar:
                 self.tree.old_vertices = self.tree.vertices
                 self.tree.vertices = self.tree.vertices
 
-                self.tree.radius = self.update_radius(self.tree.vertices, self.x_sample)
+                # self.tree.radius = self.update_radius(len(self.tree.vertices) + len(self.x_sample))
 
             while self.best_queue_vertex() <= self.best_queue_edge():
                 self.expand_vertex(self.best_in_queue_vertex)
@@ -212,7 +211,7 @@ class BITstar:
         """
         return math.sqrt((node2.x - node1.x)**2 + (node2.y - node1.y)**2)
 
-
+    # Helper functions for the algorithm (Makes it easier to write code from the given pseudocode in the paper)
     def calculate_g_hat(self, node):
         return self.calculate_euclidean_distance(self.start, node)
 
@@ -223,11 +222,7 @@ class BITstar:
         return self.calculate_g_hat(node) + self.calculate_h_hat(node)
 
     def update_radius(self, length):
-        c_best = self.g_T[self.goal]
-        lambda_x = len([1 for vertex in self.tree.vertices if self.calculate_f_hat(vertex) <= c_best])
-        radius = 2 * self.eta * (1.5 * lambda_x / math.pi * math.log(length) / length) ** 0.5
-
-        return radius
+        pass
 
     def backtrack():
         # TODO: Implement this function
