@@ -45,7 +45,7 @@ class BITstar:
         self.tree = Tree(self.start, self.goal)     # Tree
         self.x_sample = set()                       # Sampled nodes
         self.g_t = dict()                           # Cost to come to a node
-        self.delta = 0.1                            # Step size
+        self.bloat = 0.1                            # Step size
 
 
     # Algorithm 1: BIT* Algorithm
@@ -190,9 +190,53 @@ class BITstar:
 
         return min(edge_value, key=edge_value.get)
 
-    def sample():
-    # TODO: Implement this function
-        pass
+    def sample(self, num_samples, c_max, c_min, center, C):
+        sample_set = set()
+        samples_created = 0
+
+        if c_max < math.inf:
+            # Sample from the ellipse
+            radius = [c_max / 2, 
+                      math.sqrt(c_max ** 2 - c_min ** 2) / 2,
+                      math.sqrt(c_max ** 2 - c_min ** 2) / 2]
+            
+            l = np.diag(radius)
+
+            while samples_created < num_samples:
+                ball = self.sample_unit_ball()
+                rand = np.dot(np.dot(C, l), ball) + center
+
+                node = Node(rand[(0,0)], rand[(1,0)])
+
+                # check if the node is in the free space
+                check_in_obstacle = in_obstacle(node)
+                
+                if self.x_range[0] + self.bloat <= node.x <= self.x_range[1] - self.bloat:
+                    check_x = True
+                else:
+                    check_x = False
+
+                if self.y_range[0] + self.bloat <= node.y <= self.y_range[1] - self.bloat:
+                    check_y = True
+                else:
+                    check_y = False
+
+                if not check_in_obstacle and check_x and check_y:
+                    sample_set.add(node)
+                    samples_created += 1
+
+        else:
+            # Sample from the free space
+            while samples_created < num_samples:
+                node = Node(rng.uniform(self.x_range[0] + self.bloat, self.x_range[1] - self.bloat),
+                            rng.uniform(self.y_range[0] + self.bloat, self.y_range[1] - self.bloat))
+                if in_obstacle(node):
+                    continue
+                else:
+                    sample_set.add(node)
+                    samples_created += 1
+        
+        return sample_set
 
     def calculate_cost(self, node1, node2):
         if in_obstacle(): # TODO: Implement this function
