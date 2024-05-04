@@ -287,3 +287,14 @@ class BITstar:
         py = np.array(fx[1, :] + cy).flatten()
         plt.plot(cx, cy, marker='.', color='darkorange')
         plt.plot(px, py, linestyle='--', color='darkorange', linewidth=2)
+
+def main():
+    start = (1, 1)
+    goal = (9, 9)
+
+    bitstar = BITstar(start, goal)
+    tree = bitstar.plan()
+    bitstar.visualize_plan()
+
+if __name__ == "__main__":
+    main()
