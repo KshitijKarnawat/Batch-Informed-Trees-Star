@@ -216,7 +216,7 @@ class BITstar:
                 node = Node(rand[(0,0)], rand[(1,0)])
 
                 # check if the node is in the free space
-                check_in_obstacle = in_obstacle(node)
+                check_in_obstacle = self.in_obstacle(node)
                 
                 if self.x_range[0] + self.bloat <= node.x <= self.x_range[1] - self.bloat:
                     check_x = True
@@ -237,7 +237,7 @@ class BITstar:
             while samples_created < num_samples:
                 node = Node(rng.uniform(self.x_range[0] + self.bloat, self.x_range[1] - self.bloat),
                             rng.uniform(self.y_range[0] + self.bloat, self.y_range[1] - self.bloat))
-                if in_obstacle(node):
+                if self.in_obstacle(node):
                     continue
                 else:
                     sample_set.add(node)
@@ -246,7 +246,7 @@ class BITstar:
         return sample_set
 
     def calculate_cost(self, node1, node2):
-        if in_obstacle(): # TODO: Implement this function
+        if self.in_obstacle(node1) or self.in_obstacle(node2): # TODO: Implement this function
             return np.inf
         else:
             return self.calculate_euclidean_distance(node1, node2)
