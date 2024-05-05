@@ -262,6 +262,14 @@ class BITstar:
             float: The cost to come to the node
         """
         return math.sqrt((node2.x - node1.x)**2 + (node2.y - node1.y)**2)
+    
+    def in_obstacle(self, node):
+        if node.x > self.map_size[0] or node.x < 0 or node.y > self.map_size[1] or node.y < 0:
+            return True
+        
+        for obstacle in self.obstacles:
+            if math.sqrt((node.x - obstacle.center[0])**2 + (node.y - obstacle.center[1])**2) < obstacle.radius:
+                return True
 
     # Helper functions for the algorithm (Makes it easier to write code from the given pseudocode in the paper)
     def calculate_g_hat(self, node):
