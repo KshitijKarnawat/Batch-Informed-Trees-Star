@@ -354,8 +354,15 @@ class BITstar:
 def main():
     start = (1, 1)
     goal = (9, 9)
-
-    bitstar = BITstar(start, goal)
+    map_size = (10, 10)
+    obstacles = (
+        Obstacle((5, 5), 0.5), 
+        Obstacle((9, 6), 1), 
+        Obstacle((7, 5), 1), 
+        Obstacle((1, 5), 1), 
+        Obstacle((7, 9), 1)
+    )
+    bitstar = BITstar(start, goal, obstacles, map_size)
     tree = bitstar.plan()
     bitstar.visualize_plan()
 
