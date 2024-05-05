@@ -309,17 +309,15 @@ class BITstar:
     def draw_map(self):
         plt.cla()
         figure, axes = plt.subplots()
+        
+        for obstacle in self.obstacles:
+            axes.add_patch(patches.Circle(obstacle.center, obstacle.radius))
 
-        axes.add_patch(patches.Rectangle((0, 0), 1, 30))
-        axes.add_patch(patches.Rectangle((0, 30), 50, 1))
-        axes.add_patch(patches.Rectangle((1, 0), 50, 1))
-        axes.add_patch(patches.Rectangle((50, 1), 1, 30))
-
-        axes.add_patch(patches.Circle((5, 5), 0.5))
-        axes.add_patch(patches.Circle((9, 6), 1))
-        axes.add_patch(patches.Circle((7, 5), 1))
-        axes.add_patch(patches.Circle((1, 5), 1))
-        axes.add_patch(patches.Circle((7, 9), 1))
+        # axes.add_patch(patches.Circle((5, 5), 0.5))
+        # axes.add_patch(patches.Circle((9, 6), 1))
+        # axes.add_patch(patches.Circle((7, 5), 1))
+        # axes.add_patch(patches.Circle((1, 5), 1))
+        # axes.add_patch(patches.Circle((7, 9), 1))
 
         plt.plot(self.start.x, self.start.y, "rs", linewidth=3)
         plt.plot(self.goal.x, self.goal.y, "gs", linewidth=3)
