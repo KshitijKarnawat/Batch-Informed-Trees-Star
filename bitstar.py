@@ -169,34 +169,42 @@ class BITstar:
         if not self.tree.queue_vertices:
             return np.inf
         
-        return min(self.g_t[vertex] + self.calculate_h_hat(vertex) for vertex in self.tree.queue_vertices)
+        best = np.inf
+        for v in self.tree.queue_vertices:
+            best = min(best, self.g_t[v] + self.calculate_h_hat(v))
+        return best
 
     def best_queue_edge(self):
         if not self.tree.queue_edges:
             return np.inf
 
-        return min(self.g_T[vertex] + self.calculate_distance(vertex, x) + self.calculate_h_hat(x)
-                   for vertex, x in self.tree.queue_edges)
+        best = np.inf
+        for (v,x) in self.tree.queue_edges:
+            best = min(best, self.g_t[v] + self.calculate_euclidean_distance(v,x) + self.calculate_h_hat(x))
+        return best
     
     def best_in_queue_vertex(self):
         if not self.tree.queue_vertices:
             print("Vertices queue in tree is empty")
             return None
 
-        vertex_value = {vertex: self.g_T[vertex] + self.calculate_h_hat(vertex) for vertex in self.tree.queue_vertices}
-
-        return min(vertex_value, key=vertex_value.get)
-
+        vertex_value = {}
+        for v in self.tree.queue_vertices:
+            vertex_value[v] = self.g_t[v] + self.calculate_h_hat(v)
+        best = min(vertex_value, key=vertex_value.get)
+        return best
+    
     def best_in_queue_edge(self):
         if not self.tree.queue_edges:
             print("Edges queue in tree is empty")
             return None
 
-        edge_value = {(vertex, x): self.g_T[vertex] + self.calculate_distance(vertex, x) + self.calculate_h_hat(x)
-                   for vertex, x in self.tree.queue_edges}
-
-        return min(edge_value, key=edge_value.get)
-
+        edge_value = {}
+        for (v,x) in self.tree.queue_edges:
+            edge_value[(v,x)] = self.g_t[v] + self.calculate_euclidean_distance(v,x) + self.calculate_h_hat(x)
+        best = min(edge_value, key=edge_value.get)
+        return best
+    
     def sample(self, num_samples, c_max, c_min, center, C):
         sample_set = set()
         samples_created = 0
@@ -246,7 +254,7 @@ class BITstar:
         return sample_set
 
     def calculate_cost(self, node1, node2):
-        if self.in_obstacle(node1) or self.in_obstacle(node2): # TODO: Implement this function
+        if self.in_obstacle(node1) or self.in_obstacle(node2):
             return np.inf
         else:
             return self.calculate_euclidean_distance(node1, node2)
@@ -312,12 +320,6 @@ class BITstar:
         
         for obstacle in self.obstacles:
             axes.add_patch(patches.Circle(obstacle.center, obstacle.radius))
-
-        # axes.add_patch(patches.Circle((5, 5), 0.5))
-        # axes.add_patch(patches.Circle((9, 6), 1))
-        # axes.add_patch(patches.Circle((7, 5), 1))
-        # axes.add_patch(patches.Circle((1, 5), 1))
-        # axes.add_patch(patches.Circle((7, 9), 1))
 
         plt.plot(self.start.x, self.start.y, "rs", linewidth=3)
         plt.plot(self.goal.x, self.goal.y, "gs", linewidth=3)
