@@ -269,9 +269,15 @@ class BITstar:
     def update_radius(self, length):
         pass
 
-    def backtrack():
-        # TODO: Implement this function
-        pass
+    def backtrack(self):
+        node = self.goal
+        path = []
+
+        while node.parent is not None:
+            path.append(node)
+            node = node.parent
+        
+        return path
 
     def calculate_distance_and_angle(self, node1, node2):
         """Calculate the Euclidean distance between two nodes and the angle between them.
