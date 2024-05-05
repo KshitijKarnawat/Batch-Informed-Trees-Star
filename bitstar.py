@@ -16,6 +16,11 @@ import matplotlib.patches as patches
 from scipy.spatial.transform import Rotation
 
 
+class Obstacle:
+    def __init__(self, center, radius):
+        self.center = center
+        self.radius = radius
+
 class Node:
     def __init__(self, x, y, parent=None):
         self.x = x
