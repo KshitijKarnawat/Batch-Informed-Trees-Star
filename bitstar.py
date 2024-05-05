@@ -314,6 +314,13 @@ class BITstar:
         """
         return self.calculate_euclidean_distance(node1,node2), math.atan2((node2.y - node1.y), (node2.x - node1.x))
     
+    def sample_unit_ball(self):
+        while True:
+            x = rng.uniform(-1, 1)
+            y = rng.uniform(-1, 1)
+            if x ** 2 + y ** 2 <= 1:
+                return np.array([[x], [y], [0,0]])
+
     def draw_map(self):
         plt.cla()
         figure, axes = plt.subplots()
