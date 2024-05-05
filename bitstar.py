@@ -6,7 +6,6 @@
 @date: 04/30/2024
 """
 
-
 import math
 import time
 import random as rng
@@ -65,9 +64,13 @@ class BITstar:
 
         c_min, theta = self.calculate_distance_and_angle(self.start, self.goal) # Calculate the distance between the start and goal nodes
         
-        center = np.array([[(self.start.x + self.goal.x) / 2], 
-                           [(self.start.y + self.goal.y) / 2],
-                           [0,0]])                  # Calculate the center of the start and goal nodes
+        C = self.rotate_to_world_frame(self.start, 
+                                       self.goal,
+                                       c_min)
+            
+        center = np.array([[(self.start.x + self.goal.x) / 2.0], 
+                           [(self.start.y + self.goal.y) / 2.0],
+                           [0.0]])                  # Calculate the center of the start and goal nodes
 
         for i in range(self.max_iter):
             if self.tree.queue_vertices is not None and self.tree.queue_edges is not None:
@@ -82,8 +85,12 @@ class BITstar:
 
                 self.prune(self.g_t[self.goal])
                 self.x_sample.update(self.sample(num_samples,
-                                                self.g_t[self.goal]
-                                                ))
+                                                self.g_t[self.goal],
+                                                c_min,
+                                                center,
+                                                C
+                                                )
+                                    )
 
                 self.tree.old_vertices = self.tree.vertices
                 self.tree.vertices = self.tree.vertices
@@ -208,6 +215,8 @@ class BITstar:
     def sample(self, num_samples, c_max, c_min, center, C):
         sample_set = set()
         samples_created = 0
+        x_range = self.map_size[0]
+        y_range = self.map_size[1]
 
         if c_max < math.inf:
             # Sample from the ellipse
@@ -226,12 +235,12 @@ class BITstar:
                 # check if the node is in the free space
                 check_in_obstacle = self.in_obstacle(node)
                 
-                if self.x_range[0] + self.bloat <= node.x <= self.x_range[1] - self.bloat:
+                if x_range[0] + self.bloat <= node.x <= x_range[1] - self.bloat:
                     check_x = True
                 else:
                     check_x = False
 
-                if self.y_range[0] + self.bloat <= node.y <= self.y_range[1] - self.bloat:
+                if y_range[0] + self.bloat <= node.y <= y_range[1] - self.bloat:
                     check_y = True
                 else:
                     check_y = False
@@ -243,8 +252,8 @@ class BITstar:
         else:
             # Sample from the free space
             while samples_created < num_samples:
-                node = Node(rng.uniform(self.x_range[0] + self.bloat, self.x_range[1] - self.bloat),
-                            rng.uniform(self.y_range[0] + self.bloat, self.y_range[1] - self.bloat))
+                node = Node(rng.uniform(x_range[0] + self.bloat, x_range[1] - self.bloat),
+                            rng.uniform(y_range[0] + self.bloat, y_range[1] - self.bloat))
                 if self.in_obstacle(node):
                     continue
                 else:
@@ -319,7 +328,24 @@ class BITstar:
             x = rng.uniform(-1, 1)
             y = rng.uniform(-1, 1)
             if x ** 2 + y ** 2 <= 1:
-                return np.array([[x], [y], [0,0]])
+                return np.array([[x], [y], [0.0]])
+            
+    def rotate_to_world_frame(self, start, goal, L):
+        A = np.array([[goal.x - start.x],
+                      [goal.y - start.y], 
+                      [0.0]])
+        
+        E = np.array([[1.0],
+                      [0.0], 
+                      [0.0]])
+        
+        M = np.matmul(A, E.T)
+
+        U, S, V_T = np.linalg.svd(M, True, True)
+
+        C = np.matmul(np.matmul(U, np.diag([1.0, 1.0, np.linalg.det(U) * np.linalg.det(V_T)])), V_T)
+
+        return C
 
     def draw_map(self):
         plt.cla()
@@ -363,7 +389,7 @@ class BITstar:
 def main():
     start = (1, 1)
     goal = (9, 9)
-    map_size = (10, 10)
+    map_size = [[0,0], [10,10]]
     obstacles = (
         Obstacle((5, 5), 0.5), 
         Obstacle((9, 6), 1), 
