@@ -43,7 +43,7 @@ class Tree:
         self.old_vertices = set()       # Vertices in the tree in the last iteration
 
 class BITstar:
-    def __init__(self, start, goal, max_iter=200) :
+    def __init__(self, start, goal, obstacles, map_size, max_iter=200) :
         self.start = Node(start[0], start[1])       # Start node
         self.goal = Node(goal[0], goal[1])          # Goal node
         self.max_iter = max_iter                    # Maximum number of iterations
@@ -51,6 +51,8 @@ class BITstar:
         self.x_sample = set()                       # Sampled nodes
         self.g_t = dict()                           # Cost to come to a node
         self.bloat = 0.1                            # Step size
+        self.obstacles = obstacles
+        self.map_size = map_size
 
 
     # Algorithm 1: BIT* Algorithm
