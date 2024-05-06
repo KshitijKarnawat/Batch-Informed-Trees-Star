@@ -14,12 +14,6 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from scipy.spatial.transform import Rotation
 
-
-class Obstacle:
-    def __init__(self, center, radius):
-        self.center = center
-        self.radius = radius
-
 class Node:
     def __init__(self, x, y, parent=None):
         self.x = x
@@ -42,7 +36,7 @@ class Tree:
         self.old_vertices = set()       # Vertices in the tree in the last iteration
 
 class BITstar:
-    def __init__(self, start, goal, obstacles, map_size, max_iter=200) :
+    def __init__(self, start, goal, max_iter=200) :
         self.start = Node(start[0], start[1])       # Start node
         self.goal = Node(goal[0], goal[1])          # Goal node
         self.max_iter = max_iter                    # Maximum number of iterations
@@ -50,8 +44,17 @@ class BITstar:
         self.x_sample = set()                       # Sampled nodes
         self.g_t = dict()                           # Cost to come to a node
         self.bloat = 0.1                            # Step size
-        self.obstacles = obstacles
-        self.map_size = map_size
+        self.map_size = [[0, 10], [0, 10]]          # Map size
+        self.bounds = [[0, 0, 1, 10],
+                       [0, 10, 10, 1],
+                       [1, 0, 10, 1],
+                       [10, 1, 1, 10]]              # Boundaries of the map
+        self.obstacles = [[5, 5, 0.5], 
+                          [9, 6, 1],
+                          [7, 5, 1],
+                          [1, 5, 1],
+                          [7, 9, 1]]                # Obstacles in the map
+        self.fig, self.ax = plt.subplots()          # Plotting Map
 
 
     # Algorithm 1: BIT* Algorithm
@@ -81,7 +84,9 @@ class BITstar:
 
                 # Backtrack here
                 if self.goal.parent is not None:
-                    self.backtrack()
+                    path = self.backtrack()
+                    plt.plot(path[0], path[1], linewidth=2, color='r')
+                    plt.pause(0.5)
 
                 self.prune(self.g_t[self.goal])
                 self.x_sample.update(self.sample(num_samples,
@@ -93,12 +98,10 @@ class BITstar:
                                     )
 
                 self.tree.old_vertices = self.tree.vertices
-                self.tree.vertices = self.tree.vertices
-
-                # self.tree.radius = self.update_radius(len(self.tree.vertices) + len(self.x_sample))
+                self.tree.queue_vertices = self.tree.vertices
 
             while self.best_queue_vertex() <= self.best_queue_edge():
-                self.expand_vertex(self.best_in_queue_vertex)
+                self.expand_vertex(self.best_in_queue_vertex())
 
             vm, xm = self.best_in_queue_edge()
 
@@ -121,8 +124,11 @@ class BITstar:
             else:
                 self.tree.queue_edges = set()
                 self.tree.queue_vertices = set()
-        
-        return self.tree
+
+            if i % 10 == 0:
+                self.visualize(center, self.g_t[self.goal], c_min, theta)
+
+        return None
 
     # Algorithm 2: Expand Vertex
     def expand_vertex(self, v):
@@ -132,23 +138,26 @@ class BITstar:
         self.tree.queue_vertices.remove(v)
 
         for x in self.x_sample:
-            if np.linalg.norm(x-v) <= self.tree.radius:
+            if self.calculate_euclidean_distance(x,v) <= self.tree.radius:
                 x_near.add(x)
 
-        for (v,x) in np.cross(self.tree.vertices, x_near):
+        for x in x_near:
             if self.calculate_g_hat(v) + self.calculate_euclidean_distance(v,x) + self.calculate_h_hat(x) < self.g_t[self.goal]:
-                self.tree.queue_edges.add(v,x)
+                self.g_t[x] = np.inf
+                self.tree.queue_edges.add((v,x))
         
         if v not in self.tree.old_vertices:
             for w in self.tree.vertices:
                 if self.np.linalg.norm(x-v) <= self.tree.radius:
                     v_near.add(w)
 
-        for (v,w) in np.cross(self.tree.vertices, v_near):
-            if (v,w) not in self.tree.edges:
-                if self.calculate_g_hat(v) + self.calculate_euclidean_distance(v,w) + self.calculate_h_hat(w) < self.g_t[self.goal]:
-                    if self.g_t(v) + self.calculate_euclidean_distance(v,w) < self.g_t[w]:
-                        self.tree.queue_edges.add(v,w)
+            for w in v_near:
+                if (v,w) not in self.tree.edges:
+                    if self.calculate_g_hat(v) + self.calculate_euclidean_distance(v,w) + self.calculate_h_hat(w) < self.g_t[self.goal]:
+                        if self.g_t(v) + self.calculate_euclidean_distance(v,w) < self.g_t[w]:
+                            self.tree.queue_edges.add(v,w)
+                            if w not in self.g_t:
+                                self.g_t[w] = np.inf
             
 
     # Algorithm 3: Prune
@@ -232,9 +241,7 @@ class BITstar:
 
                 node = Node(rand[(0,0)], rand[(1,0)])
 
-                # check if the node is in the free space
-                check_in_obstacle = self.in_obstacle(node)
-                
+                # check if the node is in the free space                
                 if x_range[0] + self.bloat <= node.x <= x_range[1] - self.bloat:
                     check_x = True
                 else:
@@ -245,7 +252,7 @@ class BITstar:
                 else:
                     check_y = False
 
-                if not check_in_obstacle and check_x and check_y:
+                if not self.in_obstacle(node) and check_x and check_y:
                     sample_set.add(node)
                     samples_created += 1
 
@@ -281,12 +288,18 @@ class BITstar:
         return math.sqrt((node2.x - node1.x)**2 + (node2.y - node1.y)**2)
     
     def in_obstacle(self, node):
-        if node.x > self.map_size[0] or node.x < 0 or node.y > self.map_size[1] or node.y < 0:
-            return True
-        
-        for obstacle in self.obstacles:
-            if math.sqrt((node.x - obstacle.center[0])**2 + (node.y - obstacle.center[1])**2) < obstacle.radius:
+        bloat = self.bloat
+
+        for (x, y, r) in self.obstacles:
+            if math.hypot(node.x - x, node.y - y) <= r + bloat:
                 return True
+
+        for (x, y, w, h) in self.bounds:
+            if 0 <= node.x - (x - bloat) <= w + 2 * bloat \
+                    and 0 <= node.y - (y - bloat) <= h + 2 * bloat:
+                return True
+
+        return False
 
     # Helper functions for the algorithm (Makes it easier to write code from the given pseudocode in the paper)
     def calculate_g_hat(self, node):
@@ -347,59 +360,78 @@ class BITstar:
 
         return C
 
-    def draw_map(self):
+    def visualize(self, center, c_max, c_min, theta):
         plt.cla()
-        figure, axes = plt.subplots()
-        
-        for obstacle in self.obstacles:
-            axes.add_patch(patches.Circle(obstacle.center, obstacle.radius))
+        self.plot_grid()
 
-        plt.plot(self.start.x, self.start.y, "rs", linewidth=3)
-        plt.plot(self.goal.x, self.goal.y, "gs", linewidth=3)
-        plt.axis("equal")
-        plt.title("Map")
-    
-    def visualize_plan(self, c_max, c_min, theta, center):
-        self.draw_map()
-
-        for vertex in self.x_sample:
-            plt.plot(vertex.x, vertex.y, color='orange', markersize='2', marker='.')
-
-        for vertex, w in self.tree.edges:
-            plt.plot([vertex.x, w.x], [vertex.y, w.y], '-g')
+        plt.gcf().canvas.mpl_connect('key_release_event',
+                                     lambda event: [exit(0) if event.key == 'escape' else None])
         
-        if c_max >= np.inf:
-            return
-        
-        a = math.sqrt(c_max ** 2 - c_min ** 2) / 2.0
+        for v in self.sample:
+            plt.plot(v.x, v.y, marker='.', color='lightgray', markersize='2')
+
+        if c_max < math.inf:
+            self.plot_ellipse(center, c_max, c_min, theta)
+
+        for v,w in self.tree.edges:
+            plt.plot([v.x, w.x], [v.y, w.y], '-g')
+
+        plt.pause(0.001)
+
+    def plot_grid(self):
+        for (x, y, w, h) in self.bounds:
+            self.ax.add_patch(
+                patches.Rectangle(
+                    (x, y), w, h,
+                    fill=True,
+                    edgecolor='black',
+                    facecolor='black'
+                )
+            )
+
+        for (x, y, r) in self.obstacles:
+            self.ax.add_patch(
+                patches.Circle(
+                    (x, y), r,
+                    fill=True,
+                    edgecolor='black',
+                    facecolor='black'
+                )
+            )
+
+        plt.plot(self.start.x, self.start.y, marker='o', color='b', markersize=5)
+        plt.plot(self.goal.x, self.goal.y, marker='o', color='r', markersize=5)
+        plt.axis('equal')
+
+    def plot_ellipse(self, center, c_max, c_min, theta):
+        a = math.sqrt(c_max ** 2 - c_min ** 2) / 2
         b = c_max / 2.0
-        angle = math.pi / 2.0 - theta
-        cx = center[0]
-        cy = center[1]
+        angle = math.pi / 2 - theta
         t = np.arange(0, 2 * math.pi + 0.1, 0.2)
-        x = [a * math.cos(it) for it in t]
-        y = [b * math.sin(it) for it in t]
-        rot = Rotation.from_euler('z', -angle).as_dcm()[0:2, 0:2]
-        fx = rot @ np.array([x, y])
-        px = np.array(fx[0, :] + cx).flatten()
-        py = np.array(fx[1, :] + cy).flatten()
-        plt.plot(cx, cy, marker='.', color='darkorange')
-        plt.plot(px, py, linestyle='--', color='darkorange', linewidth=2)
+        x = []
+        y = []
+        for i in t:
+            x.append(a * math.cos(i))
+            y.append(b * math.sin(i))
+        rot = Rotation.from_euler('z', angle).as_matrix()[0:2, 0:2]
+        fx = np.matmul(rot, np.array([x, y]))
+        px = np.array(fx[0, :] + center[0]).flatten()
+        py = np.array(fx[1, :] + center[1]).flatten()
+        plt.plot(px, py, linestyle='--', color='blue')
+        
+
 
 def main():
     start = (1, 1)
     goal = (9, 9)
-    map_size = [[0,0], [10,10]]
-    obstacles = (
-        Obstacle((5, 5), 0.5), 
-        Obstacle((9, 6), 1), 
-        Obstacle((7, 5), 1), 
-        Obstacle((1, 5), 1), 
-        Obstacle((7, 9), 1)
-    )
-    bitstar = BITstar(start, goal, obstacles, map_size)
-    tree = bitstar.plan()
-    bitstar.visualize_plan()
+    bitstar = BITstar(start, goal)
+    path = bitstar.plan()
+
+    if path is not None:
+        print("Path found")
+        bitstar.visualize(path)
+    else:
+        print("Path not found")
 
 if __name__ == "__main__":
     main()
