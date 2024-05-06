@@ -367,7 +367,7 @@ class BITstar:
         plt.gcf().canvas.mpl_connect('key_release_event',
                                      lambda event: [exit(0) if event.key == 'escape' else None])
         
-        for v in self.sample:
+        for v in self.x_sample:
             plt.plot(v.x, v.y, marker='.', color='lightgray', markersize='2')
 
         if c_max < math.inf:
