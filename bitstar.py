@@ -43,7 +43,7 @@ class BITstar:
         self.tree = Tree(self.start, self.goal)     # Tree
         self.x_sample = set()                       # Sampled nodes
         self.g_t = dict()                           # Cost to come to a node
-        self.bloat = 0.1                            # Step size
+        self.bloat = 0.5                            # Step size
         self.map_size = [[0, 10], [0, 10]]          # Map size
         self.bounds = [[0, 0, 1, 10],
                        [0, 10, 10, 1],
