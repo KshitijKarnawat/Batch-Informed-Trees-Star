@@ -316,7 +316,7 @@ class BITstar:
         path = []
 
         while node.parent is not None:
-            path.append(node)
+            path.append([node.x, node.y])
             node = node.parent
         
         return path
