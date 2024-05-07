@@ -49,11 +49,11 @@ class BITstar:
                        [0, 10, 10, 1],
                        [1, 0, 10, 1],
                        [10, 1, 1, 10]]              # Boundaries of the map
-        self.obstacles = [[5, 5, 0.5], 
-                          [9, 6, 1],
-                          [7, 5, 1],
-                          [1, 5, 1],
-                          [7, 9, 1]]                # Obstacles in the map
+        self.obstacles = []#[[5, 5, 0.5], 
+        #                   [9, 6, 1],
+        #                   [7, 5, 1],
+        #                   [1, 5, 1],
+        #                   [7, 9, 1]]                # Obstacles in the map
         self.fig, self.ax = plt.subplots()          # Plotting Map
 
 
