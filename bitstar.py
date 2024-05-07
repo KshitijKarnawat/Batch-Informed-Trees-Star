@@ -128,7 +128,10 @@ class BITstar:
             if i % 10 == 0:
                 self.visualize(center, self.g_t[self.goal], c_min, theta)
 
-        return None
+        path = self.backtrack()
+        plt.plot(path[0], path[1], linewidth=2, color='r')
+        plt.pause(1)
+        plt.show()
 
     # Algorithm 2: Expand Vertex
     def expand_vertex(self, v):
