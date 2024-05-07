@@ -148,7 +148,7 @@ class BITstar:
         
         if v not in self.tree.old_vertices:
             for w in self.tree.vertices:
-                if self.np.linalg.norm(x-v) <= self.tree.radius:
+                if self.calculate_euclidean_distance(x, v) <= self.tree.radius:
                     v_near.add(w)
 
             for w in v_near:
