@@ -435,16 +435,10 @@ class BITstar:
         return False
 
 def main():
-    start = (1, 1)
+    start = (2, 2)
     goal = (9, 9)
     bitstar = BITstar(start, goal)
-    path = bitstar.plan()
-
-    if path is not None:
-        print("Path found")
-        bitstar.visualize(path)
-    else:
-        print("Path not found")
+    bitstar.plan()
 
 if __name__ == "__main__":
     main()
