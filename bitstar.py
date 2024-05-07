@@ -310,10 +310,7 @@ class BITstar:
 
     def calculate_f_hat(self, node):
         return self.calculate_g_hat(node) + self.calculate_h_hat(node)
-
-    def update_radius(self, length):
-        pass
-
+    
     def backtrack(self):
         node = self.goal
         path = []
