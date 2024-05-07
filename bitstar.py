@@ -270,7 +270,7 @@ class BITstar:
         return sample_set
 
     def calculate_cost(self, node1, node2):
-        if self.in_obstacle(node1) or self.in_obstacle(node2):
+        if self.path_through_obstacle(node1, node2):
             return np.inf
         else:
             return self.calculate_euclidean_distance(node1, node2)
