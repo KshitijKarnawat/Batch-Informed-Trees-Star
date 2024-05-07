@@ -36,7 +36,7 @@ class Tree:
         self.old_vertices = set()       # Vertices in the tree in the last iteration
 
 class BITstar:
-    def __init__(self, start, goal, max_iter=200) :
+    def __init__(self, start, goal, max_iter=500) :
         self.start = Node(start[0], start[1])       # Start node
         self.goal = Node(goal[0], goal[1])          # Goal node
         self.max_iter = max_iter                    # Maximum number of iterations
@@ -44,16 +44,16 @@ class BITstar:
         self.x_sample = set()                       # Sampled nodes
         self.g_t = dict()                           # Cost to come to a node
         self.bloat = 0.5                            # Step size
-        self.map_size = [[0, 10], [0, 10]]          # Map size
-        self.bounds = [[0, 0, 1, 10],
-                       [0, 10, 10, 1],
-                       [1, 0, 10, 1],
-                       [10, 1, 1, 10]]              # Boundaries of the map
-        self.obstacles = []#[[5, 5, 0.5], 
-        #                   [9, 6, 1],
-        #                   [7, 5, 1],
-        #                   [1, 5, 1],
-        #                   [7, 9, 1]]                # Obstacles in the map
+        self.map_size = [[0, 17], [0, 17]]          # Map size
+        self.bounds = [[0, 0, 1, 17],
+                       [0, 17, 17, 1],
+                       [1, 0, 17, 1],
+                       [17, 1, 1, 17]]              # Boundaries of the map
+        self.obstacles = [[7, 7, 0.5], 
+                          [11, 8, 1],
+                          [9, 7, 1],
+                          [3, 7, 1],
+                          [9, 11, 1]]                # Obstacles in the map
         self.fig, self.ax = plt.subplots()          # Plotting Map
 
 
@@ -90,7 +90,7 @@ class BITstar:
                 # Backtrack here
                 if self.goal.parent is not None:
                     path = self.backtrack()
-                    plt.plot(path[0], path[1], linewidth=2, color='r')
+                    plt.plot(path[0], path[1], linewidth=2, color='red')
                     plt.pause(1)
 
                 self.prune(self.g_t[self.goal])
@@ -333,7 +333,7 @@ class BITstar:
                 return True
 
         return False
-
+        
     # Helper functions for the algorithm (Makes it easier to write code from the given pseudocode in the paper)
     def calculate_g_hat(self, node):
         return self.calculate_euclidean_distance(self.start, node)
@@ -430,7 +430,7 @@ class BITstar:
             )
 
         plt.plot(self.start.x, self.start.y, marker='o', color='b', markersize=5)
-        plt.plot(self.goal.x, self.goal.y, marker='o', color='r', markersize=5)
+        plt.plot(self.goal.x, self.goal.y, marker='o', color='green', markersize=5)
         plt.axis('equal')
 
     def plot_ellipse(self, center, c_max, c_min, theta):
@@ -443,7 +443,7 @@ class BITstar:
         for i in t:
             x.append(a * math.cos(i))
             y.append(b * math.sin(i))
-        rot = Rotation.from_euler('z', angle).as_matrix()[0:2, 0:2]
+        rot = Rotation.from_euler('z', -angle).as_matrix()[0:2, 0:2]
         fx = np.matmul(rot, np.array([x, y]))
         px = np.array(fx[0, :] + center[0]).flatten()
         py = np.array(fx[1, :] + center[1]).flatten()
