@@ -76,31 +76,38 @@ class BITstar:
                            [0.0]])                  # Calculate the center of the start and goal nodes
 
         for i in range(self.max_iter):
-            if self.tree.queue_vertices is not None and self.tree.queue_edges is not None:
+            print("Iteration: ", i)
+            print("QE size", len(self.tree.queue_edges))
+            print("QV size", len(self.tree.queue_vertices))
+            print("Vertices size", len(self.tree.vertices))
+            if not self.tree.queue_vertices and not self.tree.queue_edges:
+                print("QV and QE are not empty")
                 if i == 0:
-                    num_samples = 400
+                    num_samples = 100
                 else:
-                    num_samples = 250
+                    num_samples = 100
 
                 # Backtrack here
                 if self.goal.parent is not None:
                     path = self.backtrack()
                     plt.plot(path[0], path[1], linewidth=2, color='r')
-                    plt.pause(0.5)
+                    plt.pause(1)
 
                 self.prune(self.g_t[self.goal])
-                self.x_sample.update(self.sample(num_samples,
-                                                self.g_t[self.goal],
-                                                c_min,
-                                                center,
-                                                C
-                                                )
-                                    )
+                self.x_sample.update(
+                    self.sample(num_samples,
+                                self.g_t[self.goal],
+                                c_min,
+                                center,
+                                C
+                                )
+                    )
 
-                self.tree.old_vertices = self.tree.vertices
-                self.tree.queue_vertices = self.tree.vertices
+                self.tree.old_vertices = self.tree.vertices.copy()
+                self.tree.queue_vertices = self.tree.vertices.copy()
 
-            while self.best_queue_vertex() <= self.best_queue_edge():
+            while self.best_queue_vertex_value() <= self.best_queue_edge_value():
+                print("Expanding vertex time", i)
                 self.expand_vertex(self.best_in_queue_vertex())
 
             vm, xm = self.best_in_queue_edge()
@@ -110,22 +117,38 @@ class BITstar:
             if self.g_t[vm] + self.calculate_euclidean_distance(vm, xm) + self.calculate_h_hat(xm) < self.g_t[self.goal]:
                 if self.calculate_g_hat(vm) + self.calculate_cost(vm, xm) + self.calculate_h_hat(xm) < self.g_t[self.goal]:
                     if self.g_t[vm] + self.calculate_cost(vm, xm) < self.g_t[xm]:
-                        for v in self.tree.vertices:
-                            if xm in self.tree.vertices:
-                                self.tree.edges.remove((v, xm))
-                            else:
-                                self.x_sample.remove(xm)
-                                self.tree.vertices.add(xm)
-                                self.tree.queue_vertices.add(xm)
-                            self.tree.edges.add((v, xm))
-                            for (v,xm) in self.tree.queue_edges:
-                                if self.g_t[v] + self.calculate_euclidean_distance(v, xm) >= self.g_t[xm]:
-                                    self.tree.queue_edges.remove((v, xm))
+                        if xm in self.tree.vertices:
+                            edge_del = set()
+                            print("Removing edges")
+                            for v,x in self.tree.edges:
+                                if x == xm:
+                                    edge_del.add((v,xm))
+
+                            for edge in edge_del:
+                                self.tree.edges.remove(edge)
+                            # self.tree.edges.remove((v, xm))
+                        else:
+                            self.x_sample.remove(xm)
+                            self.tree.vertices.add(xm)
+                            self.tree.queue_vertices.add(xm)
+
+                        self.g_t[xm] = self.g_t[vm] + self.calculate_cost(vm, xm)
+                        self.tree.edges.add((vm, xm))
+                        xm.parent = vm
+
+                        set_del = set()
+                        for v,x in self.tree.queue_edges:
+                            if x == xm and self.g_t[v] + self.calculate_euclidean_distance(v, xm) >= self.g_t[xm]:
+                                set_del.add((v,x))
+
+                        for edge in set_del:
+                            self.tree.queue_edges.remove(edge)
             else:
+                print("Resetting the queue vertices and edges")
                 self.tree.queue_edges = set()
                 self.tree.queue_vertices = set()
 
-            if i % 10 == 0:
+            if i % 5 == 0:
                 self.visualize(center, self.g_t[self.goal], c_min, theta)
 
         path = self.backtrack()
@@ -155,33 +178,40 @@ class BITstar:
                     v_near.add(w)
 
             for w in v_near:
-                if (v,w) not in self.tree.edges:
-                    if self.calculate_g_hat(v) + self.calculate_euclidean_distance(v,w) + self.calculate_h_hat(w) < self.g_t[self.goal]:
-                        if self.g_t(v) + self.calculate_euclidean_distance(v,w) < self.g_t[w]:
-                            self.tree.queue_edges.add(v,w)
-                            if w not in self.g_t:
-                                self.g_t[w] = np.inf
-            
+                if (v,w) not in self.tree.edges and self.calculate_g_hat(v) + self.calculate_euclidean_distance(v,w) + self.calculate_h_hat(w) < self.g_t[self.goal] and self.g_t[v] + self.calculate_euclidean_distance(v,w) < self.g_t[w]:
+                    self.tree.queue_edges.add((v,w))
+                    if w not in self.g_t:
+                        self.g_t[w] = np.inf
 
     # Algorithm 3: Prune
     def prune(self, c):
-
+        temp = []
         for x in self.x_sample:
             if self.calculate_f_hat(x) >= c:
-                self.x_sample.remove(x)
+                temp.append(x)
+        for x in temp:
+            self.x_sample.remove(x)
         
+        temp = []
         for v in self.tree.vertices:
             if self.calculate_f_hat(v) > c:
-                self.tree.vertices.remove(v)
+                temp.append(v)
+        for v in temp:
+            self.tree.vertices.remove(v)
 
+        temp = []
         for (v,w) in self.tree.edges:
             if self.calculate_f_hat(v) > c or self.calculate_f_hat(w) > c:
-                self.tree.edges.remove((v,w))
+                temp.append((v,w))
+        for (v,w) in temp:
+            self.tree.edges.remove((v,w))
 
+        temp = []
         for v in self.tree.vertices:
             if self.g_t[v] == np.inf:
                 self.x_sample.add(v)
-                self.tree.vertices.remove(v)
+        for v in temp:
+            self.tree.vertices.remove(v)
 
     # Other functions used in Algorithm 1
     def best_queue_vertex_value(self):
