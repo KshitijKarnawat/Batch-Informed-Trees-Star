@@ -181,7 +181,7 @@ class BITstar:
                 self.tree.vertices.remove(v)
 
     # Other functions used in Algorithm 1
-    def best_queue_vertex(self):
+    def best_queue_vertex_value(self):
         if not self.tree.queue_vertices:
             return np.inf
         
@@ -190,7 +190,7 @@ class BITstar:
             best = min(best, self.g_t[v] + self.calculate_h_hat(v))
         return best
 
-    def best_queue_edge(self):
+    def best_queue_edge_value(self):
         if not self.tree.queue_edges:
             return np.inf
 
