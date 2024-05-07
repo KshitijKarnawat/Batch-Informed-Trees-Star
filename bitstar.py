@@ -28,7 +28,7 @@ class Tree:
         self.start = start              # Start node
         self.goal = goal                # Goal node
 
-        self.radius = 0.5               # Radius of the neighborhood to explore
+        self.radius = 4.0               # Radius of the neighborhood to explore
         self.vertices = set()           # Vertices in the tree
         self.edges = set()              # Edges in the tree
         self.queue_vertices = set()     # Vertices in the queue
