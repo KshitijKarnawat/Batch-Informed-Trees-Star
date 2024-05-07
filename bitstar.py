@@ -43,22 +43,31 @@ class BITstar:
         self.tree = Tree(self.start, self.goal)     # Tree
         self.x_sample = set()                       # Sampled nodes
         self.g_t = dict()                           # Cost to come to a node
-        self.bloat = 0.5                            # Step size
+        self.bloat = 0.1                            # Step size
         self.map_size = [[0, 17], [0, 17]]          # Map size
-        self.bounds = [[0, 0, 1, 17],
-                       [0, 17, 17, 1],
-                       [1, 0, 17, 1],
-                       [17, 1, 1, 17]]              # Boundaries of the map
-        self.obstacles = [[7, 7, 0.5], 
-                          [11, 8, 1],
-                          [9, 7, 1],
-                          [3, 7, 1],
-                          [9, 11, 1]]                # Obstacles in the map
+        self.bounds = [[0, 0, 0.1, 16.9],
+                       [0, 16.9, 16.9, 0.1],
+                       [0.1, 0, 16.9, 0.1],
+                       [16.9, 0.1, 0.1, 16.9]]              # Boundaries of the map
+        self.obstacles = [[3, 3, 1], 
+                          [3, 6, 1],
+                          [3, 12, 1],
+                          [6, 3, 1], 
+                          [6, 9, 1],
+                          [6, 15, 1],
+                          [9, 3, 1], 
+                          [9, 9, 1],
+                          [9, 12, 1],
+                          [12, 6, 1],
+                          [12, 15, 1],
+                          [15, 3, 1], 
+                          [15, 12, 1]]                # Obstacles in the map
         self.fig, self.ax = plt.subplots()          # Plotting Map
 
 
     # Algorithm 1: BIT* Algorithm
     def plan(self):
+        start_time = time.time()
         self.tree.vertices.add(self.start)          # Add start node to the tree
         self.x_sample.add(self.goal)                # Add goal node to the sample set
         
@@ -82,13 +91,12 @@ class BITstar:
             print("Vertices size", len(self.tree.vertices))
             if not self.tree.queue_vertices and not self.tree.queue_edges:
                 print("QV and QE are not empty")
-                if i == 0:
-                    num_samples = 100
-                else:
-                    num_samples = 100
+                num_samples = 100
 
                 # Backtrack here
                 if self.goal.parent is not None:
+                    goal_time = time.time()
+                    print("Goal found at time: ", goal_time - start_time)
                     path = self.backtrack()
                     plt.plot(path[0], path[1], linewidth=2, color='red')
                     plt.pause(1)
@@ -150,7 +158,8 @@ class BITstar:
 
             if i % 5 == 0:
                 self.visualize(center, self.g_t[self.goal], c_min, theta)
-
+        end_time = time.time()
+        print("Time taken: ", end_time - start_time)
         path = self.backtrack()
         plt.plot(path[0], path[1], linewidth=2, color='r')
         plt.pause(1)
@@ -468,9 +477,9 @@ class BITstar:
         return False
 
 def main():
-    start = (2, 2)
-    goal = (9, 9)
-    bitstar = BITstar(start, goal)
+    start = (7, 7)
+    goal = (16, 16)
+    bitstar = BITstar(start, goal, 1000)
     bitstar.plan()
 
 if __name__ == "__main__":
