@@ -416,7 +416,23 @@ class BITstar:
         py = np.array(fx[1, :] + center[1]).flatten()
         plt.plot(px, py, linestyle='--', color='blue')
         
+    def path_through_obstacle(self, start, end):
+        if self.in_obstacle(start) or self.in_obstacle(end):
+            return True
+        
+        dir = [end.x - start.x, end.y - start.y]
 
+        for (x, y, r) in self.obstacles:
+            if np.dot(dir, dir) == 0:
+                continue
+            
+            t = np.dot([x - start.x, y - start.y], dir) / np.dot(dir, dir)
+            if 0 <= t <= 1:
+                shot = Node(start.x + t * dir[0], start.y + t * dir[1])
+                if self.calculate_euclidean_distance(shot, Node(x, y)) <= r:
+                    return True
+                
+        return False
 
 def main():
     start = (1, 1)
