@@ -1,0 +1,6 @@
+numpy
+matplotlib
+scipy
+random
+time
+math
