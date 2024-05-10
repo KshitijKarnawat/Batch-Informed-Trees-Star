@@ -118,11 +118,10 @@ class BITstar:
                         print("Solution found at iteration: ", i)
                         save = [goal_time - start_time, i]
                         flag = False
-                    path = self.backtrack()
-                    for i in range(len(path[0]) - 1):
-                        plt.plot([path[0][i], path[0][i + 1]], [path[1][i], path[1][i + 1]], linewidth=2, color='red')
-                        plt.pause(1)
-
+                    a,y = self.backtrack()
+                    plt.plot(a,y, linewidth=2, color='red')
+                    plt.pause(1)
+                    
                 self.prune(self.g_t[self.goal])
                 self.x_sample.update(
                     self.sample(num_samples,
@@ -182,10 +181,10 @@ class BITstar:
                 self.visualize(center, self.g_t[self.goal], c_min, theta)
         end_time = time.time()
         print("Time taken: ", end_time - start_time)
-        path = self.backtrack()
-        for i in range(len(path[0]) - 1):
-            plt.plot([path[0][i], path[0][i + 1]], [path[1][i], path[1][i + 1]], linewidth=2, color='red')
-            plt.pause(0.1)
+
+        a, y = self.backtrack()
+        plt.plot(a, y, linewidth=2, color='red')
+        plt.pause(10)
         plt.show()
         print("Goal found at time: ", save[0])
         print("Solution found at iteration: ", save[1])
@@ -468,13 +467,16 @@ class BITstar:
             list: x, y coordinates of the path
         """
         node = self.goal
-        path = []
+        a = []
+        y = []
 
         while node.parent is not None:
-            path.append([node.x, node.y])
+            a.append(node.x)
+            y.append(node.y)
+            # path.append([node.x, node.y])
             node = node.parent
-        
-        return path
+
+        return a, y
 
     def calculate_distance_and_angle(self, node1, node2):
         """Calculate the Euclidean distance between two nodes and the angle between them.
