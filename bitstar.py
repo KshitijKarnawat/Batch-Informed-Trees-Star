@@ -119,8 +119,9 @@ class BITstar:
                         save = [goal_time - start_time, i]
                         flag = False
                     path = self.backtrack()
-                    plt.plot(path[0], path[1], linewidth=2, color='red')
-                    plt.pause(1)
+                    for i in range(len(path[0]) - 1):
+                        plt.plot([path[0][i], path[0][i + 1]], [path[1][i], path[1][i + 1]], linewidth=2, color='red')
+                        plt.pause(1)
 
                 self.prune(self.g_t[self.goal])
                 self.x_sample.update(
@@ -182,8 +183,9 @@ class BITstar:
         end_time = time.time()
         print("Time taken: ", end_time - start_time)
         path = self.backtrack()
-        plt.plot(path[0], path[1], linewidth=2, color='r')
-        plt.pause(1)
+        for i in range(len(path[0]) - 1):
+            plt.plot([path[0][i], path[0][i + 1]], [path[1][i], path[1][i + 1]], linewidth=2, color='red')
+            plt.pause(0.1)
         plt.show()
         print("Goal found at time: ", save[0])
         print("Solution found at iteration: ", save[1])
