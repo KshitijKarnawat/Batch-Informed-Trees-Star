@@ -15,6 +15,9 @@ import matplotlib.patches as patches
 from scipy.spatial.transform import Rotation
 
 class Node:
+    """A node in the tree with x and y coordinates and a parent node.
+
+    """
     def __init__(self, x, y, parent=None):
         self.x = x
         self.y = y
@@ -36,7 +39,17 @@ class Tree:
         self.old_vertices = set()       # Vertices in the tree in the last iteration
 
 class BITstar:
+    """Batch Informed Trees (BIT*) algorithm.
+
+    """
     def __init__(self, start, goal, max_iter=500) :
+        """Initialize the BIT* algorithm.
+
+        Args:
+            start (Node): Start node
+            goal (Node): Goal node
+            max_iter (int, optional): Maximum iterations the program can run for. Defaults to 500.
+        """
         self.start = Node(start[0], start[1])       # Start node
         self.goal = Node(goal[0], goal[1])          # Goal node
         self.max_iter = max_iter                    # Maximum number of iterations
@@ -48,7 +61,7 @@ class BITstar:
         self.bounds = [[0, 0, 0.1, 16.9],
                        [0, 16.9, 16.9, 0.1],
                        [0.1, 0, 16.9, 0.1],
-                       [16.9, 0.1, 0.1, 16.9]]              # Boundaries of the map
+                       [16.9, 0.1, 0.1, 16.9]]      # Boundaries of the map
         self.obstacles = [[3, 3, 1], 
                           [3, 6, 1],
                           [3, 12, 1],
@@ -61,13 +74,17 @@ class BITstar:
                           [12, 6, 1],
                           [12, 15, 1],
                           [15, 3, 1], 
-                          [15, 12, 1]]                # Obstacles in the map
+                          [15, 12, 1],
+                          [15, 15, 1]]              # Obstacles in the map
         self.fig, self.ax = plt.subplots()          # Plotting Map
 
 
     # Algorithm 1: BIT* Algorithm
     def plan(self):
+        """The main function that runs the BIT* algorithm.
+        """
         start_time = time.time()
+        flag = True
         self.tree.vertices.add(self.start)          # Add start node to the tree
         self.x_sample.add(self.goal)                # Add goal node to the sample set
         
@@ -95,8 +112,12 @@ class BITstar:
 
                 # Backtrack here
                 if self.goal.parent is not None:
-                    goal_time = time.time()
-                    print("Goal found at time: ", goal_time - start_time)
+                    if flag:
+                        goal_time = time.time()
+                        print("Goal found at time: ", goal_time - start_time)
+                        print("Solution found at iteration: ", i)
+                        save = [goal_time - start_time, i]
+                        flag = False
                     path = self.backtrack()
                     plt.plot(path[0], path[1], linewidth=2, color='red')
                     plt.pause(1)
@@ -164,9 +185,16 @@ class BITstar:
         plt.plot(path[0], path[1], linewidth=2, color='r')
         plt.pause(1)
         plt.show()
+        print("Goal found at time: ", save[0])
+        print("Solution found at iteration: ", save[1])
 
     # Algorithm 2: Expand Vertex
     def expand_vertex(self, v):
+        """The function to expand a vertex in the tree.
+
+        Args:
+            v (vertex): The best veertex in the tree
+        """
         x_near = set()
         v_near = set()
 
@@ -194,6 +222,11 @@ class BITstar:
 
     # Algorithm 3: Prune
     def prune(self, c):
+        """Prune the tree and the sample set
+
+        Args:
+            c (int): Cost to come to the goal node
+        """
         temp = []
         for x in self.x_sample:
             if self.calculate_f_hat(x) >= c:
@@ -224,6 +257,11 @@ class BITstar:
 
     # Other functions used in Algorithm 1
     def best_queue_vertex_value(self):
+        """Value of the best vertex in the queue
+
+        Returns:
+            float: best vertex value
+        """
         if not self.tree.queue_vertices:
             return np.inf
         
@@ -233,6 +271,11 @@ class BITstar:
         return best
 
     def best_queue_edge_value(self):
+        """Finds the best edge in the queue
+
+        Returns:
+            float: value of the best edge
+        """
         if not self.tree.queue_edges:
             return np.inf
 
@@ -242,6 +285,11 @@ class BITstar:
         return best
     
     def best_in_queue_vertex(self):
+        """Finds the best vertex in the queue
+
+        Returns:
+            vertex: The best vertex in the queue
+        """
         if not self.tree.queue_vertices:
             print("Vertices queue in tree is empty")
             return None
@@ -253,6 +301,11 @@ class BITstar:
         return best
     
     def best_in_queue_edge(self):
+        """Find the best edge in the queue
+
+        Returns:
+            edge: The best edge in the queue
+        """
         if not self.tree.queue_edges:
             print("Edges queue in tree is empty")
             return None
@@ -264,6 +317,18 @@ class BITstar:
         return best
     
     def sample(self, num_samples, c_max, c_min, center, C):
+        """Sample points or nodes in the free space (region of interest)
+
+        Args:
+            num_samples (int): number of samples to be generated
+            c_max (node): 
+            c_min (float): 
+            center (_type_):
+            C (_type_):
+
+        Returns:
+            set: Sampled nodes in the ellipsoid space
+        """
         sample_set = set()
         samples_created = 0
         x_range = self.map_size[0]
@@ -312,6 +377,15 @@ class BITstar:
         return sample_set
 
     def calculate_cost(self, node1, node2):
+        """Calculate the true cost to come to a node.
+
+        Args:
+            node1 (Node): The first node
+            node2 (Node): The second node
+
+        Returns:
+            float: Cost to come to the node
+        """
         if self.path_through_obstacle(node1, node2):
             return np.inf
         else:
@@ -330,6 +404,14 @@ class BITstar:
         return math.sqrt((node2.x - node1.x)**2 + (node2.y - node1.y)**2)
     
     def in_obstacle(self, node):
+        """Check if a node is in an obstacle
+
+        Args:
+            node (Node): The node to check
+
+        Returns:
+            bool: True if the node is in an obstacle, False otherwise
+        """
         bloat = self.bloat
 
         for (x, y, r) in self.obstacles:
@@ -345,15 +427,44 @@ class BITstar:
         
     # Helper functions for the algorithm (Makes it easier to write code from the given pseudocode in the paper)
     def calculate_g_hat(self, node):
+        """Estimate the cost to come to a node
+
+        Args:
+            node (Node): The node to calculate the cost to come to
+
+        Returns:
+            float: Cost to come to the node
+        """
         return self.calculate_euclidean_distance(self.start, node)
 
     def calculate_h_hat(self, node):
+        """Calculate the heuristic cost to go from a node to the goal node
+
+        Args:
+            node (Node): Node to calculate the heuristic cost to go to the goal node
+
+        Returns:
+            float: Cost to go to the goal node
+        """
         return self.calculate_euclidean_distance(node, self.goal)
 
     def calculate_f_hat(self, node):
+        """Calculate the total cost to go from the start node to the goal node through a node
+
+        Args:
+            node (Node): The node to calculate the total cost to go to the goal node
+
+        Returns:
+            float: Cost to go to the goal node
+        """
         return self.calculate_g_hat(node) + self.calculate_h_hat(node)
     
     def backtrack(self):
+        """Backtrack to extract the path from the goal node to the start node
+
+        Returns:
+            list: x, y coordinates of the path
+        """
         node = self.goal
         path = []
 
@@ -376,6 +487,11 @@ class BITstar:
         return self.calculate_euclidean_distance(node1,node2), math.atan2((node2.y - node1.y), (node2.x - node1.x))
     
     def sample_unit_ball(self):
+        """Sample a point in the unit ball
+
+        Returns:
+            numpy array: The point in the unit ball
+        """
         while True:
             x = rng.uniform(-1, 1)
             y = rng.uniform(-1, 1)
@@ -383,6 +499,16 @@ class BITstar:
                 return np.array([[x], [y], [0.0]])
             
     def rotate_to_world_frame(self, start, goal, L):
+        """Rotate the ellipse to the world frame
+
+        Args:
+            start (node): The start node
+            goal (Node): The goal node
+            L (floar): length of the ellipse
+
+        Returns:
+            numpy array: Matrix to rotate the ellipse to the world frame
+        """
         A = np.array([[goal.x - start.x],
                       [goal.y - start.y], 
                       [0.0]])
@@ -400,6 +526,14 @@ class BITstar:
         return C
 
     def visualize(self, center, c_max, c_min, theta):
+        """Visualize the tree and the path
+
+        Args:
+            center (tuple): Center of the ellipse
+            c_max (Float): Cost to come to the goal node
+            c_min (float): Length of the ellipse
+            theta (float): Angle of the ellipse
+        """
         plt.cla()
         self.plot_grid()
 
@@ -418,6 +552,8 @@ class BITstar:
         plt.pause(0.001)
 
     def plot_grid(self):
+        """Plot the environment space with obstacles and boundaries
+        """
         for (x, y, w, h) in self.bounds:
             self.ax.add_patch(
                 patches.Rectangle(
@@ -443,6 +579,14 @@ class BITstar:
         plt.axis('equal')
 
     def plot_ellipse(self, center, c_max, c_min, theta):
+        """Plot the ellipse in the environment space
+
+        Args:
+            center (tuple): Center of the ellipse
+            c_max (float): Cost to come to the goal node
+            c_min (float): length of the ellipse
+            theta (float): angle of the ellipse
+        """
         a = math.sqrt(c_max ** 2 - c_min ** 2) / 2
         b = c_max / 2.0
         angle = math.pi / 2 - theta
@@ -459,6 +603,15 @@ class BITstar:
         plt.plot(px, py, linestyle='--', color='blue')
         
     def path_through_obstacle(self, start, end):
+        """Check if the path goes through an obstacle
+
+        Args:
+            start (Node): Start node
+            end (Node): End node
+
+        Returns:
+            bool: True if the path goes through an obstacle, False otherwise
+        """
         if self.in_obstacle(start) or self.in_obstacle(end):
             return True
         
@@ -477,7 +630,9 @@ class BITstar:
         return False
 
 def main():
-    start = (7, 7)
+    """Main function to run the BIT* algorithm
+    """
+    start = (8, 8)
     goal = (16, 16)
     bitstar = BITstar(start, goal, 1000)
     bitstar.plan()
